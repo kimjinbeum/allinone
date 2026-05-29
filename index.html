@@ -6,76 +6,221 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CalcMaster - 깔끔하고 스마트한 웹 계산기</title>
     <link rel="stylesheet" href="style.css">
+    <!-- TensorFlow.js, Math.js, Chart.js Libraries -->
+    <script src='https://unpkg.com/tesseract.js@5/dist/tesseract.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF and html2canvas for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-    <div class="calculator-container">
-        <div class="calculator">
-            <div class="display">
-                <input type="text" id="result" readonly>
-            </div>
-            <div class="calculator-grid">
-                <!-- Functions Area -->
-                <div class="functions-area">
-                    <button class="btn fn" onclick="calculate('sin')">sin</button>
-                    <button class="btn fn" onclick="calculate('cos')">cos</button>
-                    <button class="btn fn" onclick="calculate('tan')">tan</button>
-
-                    <button class="btn fn" onclick="calculate('asin')">asin</button>
-                    <button class="btn fn" onclick="calculate('acos')">acos</button>
-                    <button class="btn fn" onclick="calculate('atan')">atan</button>
-
-                    <button class="btn fn" onclick="calculate('log')">log</button>
-                    <button class="btn fn" onclick="calculate('ln')">ln</button>
-                    <button class="btn fn" onclick="calculate('sqrt')">√</button>
-
-                    <button class="btn fn" onclick="calculate('pi')">π</button>
-                    <button class="btn fn" onclick="calculate('e')">e</button>
-                    <button class="btn fn" onclick="calculate('pow')">x^y</button>
-
-                    <button class="btn fn" onclick="appendOperator('(')">(</button>
-                    <button class="btn fn" onclick="appendOperator(')')">)</button>
-                    <button class="btn fn" onclick="calculate('exp')">exp</button>
-                </div>
-
-                <!-- Basic Pad Area -->
-                <div class="basic-area">
-                    <button class="btn op" onclick="clearDisplay()">C</button>
-                    <button class="btn op" onclick="deleteChar()">DEL</button>
-                    <button class="btn op" onclick="appendOperator('/')">/</button>
-
-                    <button class="btn num" onclick="appendNumber('7')">7</button>
-                    <button class="btn num" onclick="appendNumber('8')">8</button>
-                    <button class="btn num" onclick="appendNumber('9')">9</button>
-
-                    <button class="btn num" onclick="appendNumber('4')">4</button>
-                    <button class="btn num" onclick="appendNumber('5')">5</button>
-                    <button class="btn num" onclick="appendNumber('6')">6</button>
-
-                    <button class="btn num" onclick="appendNumber('1')">1</button>
-                    <button class="btn num" onclick="appendNumber('2')">2</button>
-                    <button class="btn num" onclick="appendNumber('3')">3</button>
-
-                    <button class="btn num" onclick="appendNumber('0')" style="grid-column: span 2;">0</button>
-                    <button class="btn num" onclick="appendNumber('.')">.</button>
-                </div>
-
-                <!-- Operators Area -->
-                <div class="operators-area">
-                    <button class="btn op" onclick="appendOperator('*')">*</button>
-                    <button class="btn op" onclick="appendOperator('-')">-</button>
-                    <button class="btn op" onclick="appendOperator('+')">+</button>
-                    <button class="btn op equals" onclick="evaluateExpression()">=</button>
-                </div>
-            </div>
+    <div class="top-bar">
+        <!-- Local Time Display -->
+        <div class="server-time">
+            <span>현재 로컬 시간: </span><span id="server-time-display">Loading time...</span>
         </div>
-        <div class="history-panel">
-            <h3>계산 기록</h3>
-            <ul id="history-list">
-                <!-- 기록이 여기에 추가됩니다. -->
-            </ul>
-            <button id="clear-history" onclick="clearHistory()">기록 지우기</button>
+        <div class="theme-switcher">
+            <label class="switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider round"></span>
+            </label>
+            <span>다크 모드</span>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <div class="app-container">
+        <!-- 대메뉴 탭 네비게이션 -->
+        <div class="main-tabs">
+            <button class="main-tab-btn active" onclick="openMainMenu(event, 'calculator-menu')">계산기</button>
+            <button class="main-tab-btn" onclick="openMainMenu(event, 'server-time-menu')">서버 시간</button>
+        </div>
+
+        <!-- 1. 계산기 대메뉴 내용 -->
+        <div id="calculator-menu" class="main-menu-content active">
+            <!-- 하위 탭 네비게이션 (공학용 / 그래프) -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="openTab(event, 'scientific-tab')">공학용</button>
+                <button class="tab-btn" onclick="openTab(event, 'graphing-tab')">그래프 계산기</button>
+            </div>
+
+            <!-- 공학용 계산기 탭 내용 -->
+            <div id="scientific-tab" class="tab-content active">
+                <div class="main-container">
+                    <div class="calculator">
+                        <div class="display">
+                            <input type="text" id="result" readonly>
+                        </div>
+                        <div class="controls">
+                            <button class="btn" id="deg-rad-toggle">RAD</button>
+                            <button class="btn" onclick="memoryClear()">MC</button>
+                            <button class="btn" onclick="memoryRecall()">MR</button>
+                            <button class="btn" onclick="memoryAdd()">M+</button>
+                            <button class="btn" onclick="memorySubtract()">M-</button>
+                        </div>
+                        <div class="calculator-grid">
+                            <div class="functions-area">
+                                <button class="btn fn" onclick="calculate('sin')">sin</button>
+                                <button class="btn fn" onclick="calculate('cos')">cos</button>
+                                <button class="btn fn" onclick="calculate('tan')">tan</button>
+                                <button class="btn fn" onclick="calculate('asin')">asin</button>
+                                <button class="btn fn" onclick="calculate('acos')">acos</button>
+                                <button class="btn fn" onclick="calculate('atan')">atan</button>
+                                <button class="btn fn" onclick="calculate('log')">log</button>
+                                <button class="btn fn" onclick="calculate('ln')">ln</button>
+                                <button class="btn fn" onclick="calculate('sqrt')">√</button>
+                                <button class="btn fn" onclick="calculate('pi')">π</button>
+                                <button class="btn fn" onclick="calculate('e')">e</button>
+                                <button class="btn fn" onclick="calculate('pow')">x^y</button>
+                                <button class="btn fn" onclick="appendOperator('(')">(</button>
+                                <button class="btn fn" onclick="appendOperator(')')">)</button>
+                                <button class="btn fn" onclick="calculate('exp')">exp</button>
+                            </div>
+                            <div class="main-pad">
+                                <div class="basic-area">
+                                    <button class="btn op" onclick="clearDisplay()">C</button>
+                                    <button class="btn op" onclick="deleteChar()">DEL</button>
+                                    <button class="btn op" onclick="appendOperator('/')">/</button>
+                                    <button class="btn num" onclick="appendNumber('7')">7</button>
+                                    <button class="btn num" onclick="appendNumber('8')">8</button>
+                                    <button class="btn num" onclick="appendNumber('9')">9</button>
+                                    <button class="btn num" onclick="appendNumber('4')">4</button>
+                                    <button class="btn num" onclick="appendNumber('5')">5</button>
+                                    <button class="btn num" onclick="appendNumber('6')">6</button>
+                                    <button class="btn num" onclick="appendNumber('1')">1</button>
+                                    <button class="btn num" onclick="appendNumber('2')">2</button>
+                                    <button class="btn num" onclick="appendNumber('3')">3</button>
+                                    <button class="btn num" onclick="appendNumber('0')" style="grid-column: span 2;">0</button>
+                                    <button class="btn num" onclick="appendNumber('.')">.</button>
+                                </div>
+                                <div class="operators-area">
+                                    <button class="btn op" onclick="appendOperator('*')">*</button>
+                                    <button class="btn op" onclick="appendOperator('-')">-</button>
+                                    <button class="btn op" onclick="appendOperator('+')">+</button>
+                                    <button class="btn op equals" onclick="evaluateExpression()">=</button>
+                                </div>
+                            </div>
+                            <div class="handwriting-area collapsed">
+                                <div class="handwriting-header" id="handwriting-toggle">
+                                    <h4>손글씨</h4>
+                                    <span class="toggle-arrow">▼</span>
+                                </div>
+                                <div class="handwriting-content">
+                                    <canvas id="handwriting-canvas" width="140" height="140"></canvas>
+                                    <small>좌클릭: 쓰기 / 우클릭: 인식</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="history-panel">
+                        <h3>계산 기록</h3>
+                        <ul id="history-list"></ul>
+                        <button id="clear-history" onclick="clearHistory()">기록 지우기</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 그래프 계산기 탭 내용 -->
+            <div id="graphing-tab" class="tab-content">
+                <div class="graphing-container">
+                    <div class="graphing-inputs">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3>함수 그래프 그리기</h3>
+                            <button class="btn fn" onclick="downloadGraphPDF()" style="padding: 8px 15px; font-size: 14px;">PDF 다운로드</button>
+                        </div>
+                        <div class="func-input-group">
+                            <span>f(x) = </span>
+                            <input type="text" id="func-input" placeholder="예: sin(x) 혹은 x^2" onkeydown="if(event.key==='Enter') plotGraph()">
+                            <button class="btn equals" onclick="plotGraph()">그래프 생성</button>
+                        </div>
+                        <div class="graphing-settings">
+                            <div>
+                                <label>X 범위 최소:</label> <input type="number" id="x-min" value="-10">
+                            </div>
+                            <div>
+                                <label>X 범위 최대:</label> <input type="number" id="x-max" value="10">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="graph-area" id="graph-export-area">
+                        <canvas id="graph-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 서버 시간 대메뉴 내용 -->
+        <div id="server-time-menu" class="main-menu-content">
+            <div class="server-time-container">
+                <h2>웹사이트 타임시커 (서버 시간 확인)</h2>
+                <div class="url-input-group">
+                    <input type="text" id="url-input" placeholder="예: naver.com 또는 interpark.com" onkeydown="if(event.key==='Enter') fetchServerTime()">
+                    <button class="btn fn" onclick="fetchServerTime()">시간 확인</button>
+                </div>
+                <div class="large-time-display" id="target-server-time">
+                    URL을 입력해주세요
+                </div>
+                <div class="date-display" id="target-server-date"></div>
+                <p class="time-desc" id="server-time-desc">수강신청, 티켓팅, 예매에 필수적인 정확한 서버 시간을 확인하세요.</p>
+
+                <div class="alarm-section">
+                    <h4>⏰ 예약 알람</h4>
+                    <div class="alarm-input-row">
+                        <input type="time" id="alarm-time-input" step="1">
+                        <button class="btn fn" onclick="setAlarm()">알람 설정</button>
+                        <button class="btn op" id="alarm-cancel-btn" onclick="clearAlarm()" style="display:none">취소</button>
+                    </div>
+                    <p id="alarm-status"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="alarm-toast" class="alarm-toast">
+            <div class="alarm-toast-icon">🔔</div>
+            <div class="alarm-toast-body">
+                <div class="alarm-toast-title" id="alarm-toast-title"></div>
+                <div class="alarm-toast-time" id="alarm-toast-time"></div>
+            </div>
+            <button class="alarm-toast-close" onclick="dismissToast()">✕</button>
+        </div>
+
+    </div>
+
+    <!-- 스크립트 분리 -->
+    <script>
+        function openMainMenu(evt, menuName) {
+            let i, menuContent, mainTabLinks;
+            menuContent = document.getElementsByClassName("main-menu-content");
+            for (i = 0; i < menuContent.length; i++) {
+                menuContent[i].style.display = "none";
+                menuContent[i].classList.remove("active");
+            }
+            mainTabLinks = document.getElementsByClassName("main-tab-btn");
+            for (i = 0; i < mainTabLinks.length; i++) {
+                mainTabLinks[i].classList.remove("active");
+            }
+            document.getElementById(menuName).style.display = "block";
+            document.getElementById(menuName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        function openTab(evt, tabName) {
+            let i, tabContent, tabBtns;
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].style.display = "none";
+                tabContent[i].classList.remove("active");
+            }
+            tabBtns = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tabBtns.length; i++) {
+                tabBtns[i].classList.remove("active");
+            }
+            document.getElementById(tabName).style.display = "block";
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+    <script src="serverTime.js"></script>
+    <script src="calculator.js"></script>
 </body>
 </html>
