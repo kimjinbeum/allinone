@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="google-site-verification" content="W9HFHe0Gw03gxnL69YR8VjN-Ej5pTETPwMKWD6xOrms" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalcMaster - 깔끔하고 스마트한 AllInOne 서버시간,계산기 등 편리기능</title>
+    <title>AllInOne - 만능 웹 도구</title>
     <link rel="stylesheet" href="style.css">
     <!-- Libraries -->
     <script src='https://unpkg.com/tesseract.js@5/dist/tesseract.min.js'></script>
@@ -12,146 +11,335 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 </head>
 <body>
-    <div class="top-bar">
-        <div class="server-time">
-          <!--  <span>현재 로컬 시간: </span><span id="local-time-display"></span>-->
-        </div>
-        <div class="theme-switcher">
-            <label class="switch">
-                <input type="checkbox" id="theme-toggle">
-                <span class="slider round"></span>
-            </label>
-            <span>다크 모드</span>
-        </div>
-    </div>
-
-    <div class="app-container">
-        <div class="main-tabs">
-            <button class="main-tab-btn active" onclick="openMainMenu(event, 'server-time-menu')">서버 시간</button>
-            <button class="main-tab-btn" onclick="openMainMenu(event, 'calculator-menu')">계산기</button>
-        </div>
-
-        <div id="calculator-menu" class="main-menu-content">
-            <div class="tabs">
-                <button class="tab-btn active" onclick="openTab(event, 'scientific-tab')">공학용</button>
-                <button class="tab-btn" onclick="openTab(event, 'graphing-tab')">그래프 계산기</button>
+    <div class="page-wrapper">
+        <!-- GNB (Global Navigation Bar) -->
+        <nav class="gnb">
+            <div class="gnb-header">
+                <h1>AllInOne</h1>
             </div>
-            <div id="scientific-tab" class="tab-content active">
-                <div class="main-container">
-                    <div class="calculator">
-                        <div class="display"><input type="text" id="result" readonly></div>
-                        <div class="controls">
-                            <button class="btn" id="deg-rad-toggle">RAD</button>
-                            <button class="btn" onclick="memoryClear()">MC</button>
-                            <button class="btn" onclick="memoryRecall()">MR</button>
-                            <button class="btn" onclick="memoryAdd()">M+</button>
-                            <button class="btn" onclick="memorySubtract()">M-</button>
-                        </div>
-                        <div class="calculator-grid">
-                            <div class="functions-area">
-                                <button class="btn fn" onclick="calculate('sin')">sin</button>
-                                <button class="btn fn" onclick="calculate('cos')">cos</button>
-                                <button class="btn fn" onclick="calculate('tan')">tan</button>
-                                <button class="btn fn" onclick="calculate('asin')">asin</button>
-                                <button class="btn fn" onclick="calculate('acos')">acos</button>
-                                <button class="btn fn" onclick="calculate('atan')">atan</button>
-                                <button class="btn fn" onclick="calculate('log')">log</button>
-                                <button class="btn fn" onclick="calculate('ln')">ln</button>
-                                <button class="btn fn" onclick="calculate('sqrt')">√</button>
-                                <button class="btn fn" onclick="calculate('pi')">π</button>
-                                <button class="btn fn" onclick="calculate('e')">e</button>
-                                <button class="btn fn" onclick="calculate('pow')">x^y</button>
-                                <button class="btn fn" onclick="appendOperator('(')">(</button>
-                                <button class="btn fn" onclick="appendOperator(')')">)</button>
-                                <button class="btn fn" onclick="calculate('exp')">exp</button>
-                            </div>
-                            <div class="main-pad">
-                                <div class="basic-area">
-                                    <button class="btn op" onclick="clearDisplay()">C</button>
-                                    <button class="btn op" onclick="deleteChar()">DEL</button>
-                                    <button class="btn op" onclick="appendOperator('/')">/</button>
-                                    <button class="btn num" onclick="appendNumber('7')">7</button>
-                                    <button class="btn num" onclick="appendNumber('8')">8</button>
-                                    <button class="btn num" onclick="appendNumber('9')">9</button>
-                                    <button class="btn num" onclick="appendNumber('4')">4</button>
-                                    <button class="btn num" onclick="appendNumber('5')">5</button>
-                                    <button class="btn num" onclick="appendNumber('6')">6</button>
-                                    <button class="btn num" onclick="appendNumber('1')">1</button>
-                                    <button class="btn num" onclick="appendNumber('2')">2</button>
-                                    <button class="btn num" onclick="appendNumber('3')">3</button>
-                                    <button class="btn num" onclick="appendNumber('0')" style="grid-column: span 2;">0</button>
-                                    <button class="btn num" onclick="appendNumber('.')">.</button>
-                                </div>
-                                <div class="operators-area">
-                                    <button class="btn op" onclick="appendOperator('*')">*</button>
-                                    <button class="btn op" onclick="appendOperator('-')">-</button>
-                                    <button class="btn op" onclick="appendOperator('+')">+</button>
-                                    <button class="btn op equals" onclick="evaluateExpression()">=</button>
-                                </div>
-                            </div>
-                            <div class="handwriting-area collapsed">
-                                <div class="handwriting-header" id="handwriting-toggle">
-                                    <h4>손글씨</h4><span class="toggle-arrow">▼</span>
-                                </div>
-                                <div class="handwriting-content">
-                                    <canvas id="handwriting-canvas" width="140" height="140"></canvas>
-                                    <small>좌클릭: 쓰기 / 우클릭: 인식</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="history-panel">
-                        <h3>계산 기록</h3>
-                        <ul id="history-list"></ul>
-                        <button id="clear-history" onclick="clearHistory()">기록 지우기</button>
-                    </div>
+            <ul class="gnb-menu">
+                <li><button class="gnb-btn active" onclick="openMainMenu(event, 'server-time-menu')">⏰ 서버 시간</button></li>
+                <li><button class="gnb-btn" onclick="openMainMenu(event, 'calculator-menu')">🧮 계산기</button></li>
+                <li><button class="gnb-btn" onclick="openMainMenu(event, 'file-converter-menu')">🔄 파일 변환기</button></li>
+            </ul>
+            <div class="gnb-footer">
+                <div class="theme-switcher">
+                    <label class="switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span>다크 모드</span>
                 </div>
             </div>
-            <div id="graphing-tab" class="tab-content">
-                <div class="graphing-container">
-                    <div class="graphing-inputs">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3>함수 그래프 그리기</h3>
-                            <button class="btn fn" onclick="downloadGraphPDF()">PDF 다운로드</button>
-                        </div>
-                        <div class="func-input-group">
-                            <span>f(x) = </span>
-                            <input type="text" id="func-input" placeholder="예: sin(x) 혹은 x^2" onkeydown="if(event.key==='Enter') plotGraph()">
-                            <button class="btn equals" onclick="plotGraph()">그래프 생성</button>
-                        </div>
-                        <div class="graphing-settings">
-                            <div><label>X 범위 최소:</label> <input type="number" id="x-min" value="-10"></div>
-                            <div><label>X 범위 최대:</label> <input type="number" id="x-max" value="10"></div>
-                        </div>
-                    </div>
-                    <div class="graph-area" id="graph-export-area"><canvas id="graph-canvas"></canvas></div>
-                </div>
-            </div>
-        </div>
+        </nav>
 
-        <div id="server-time-menu" class="main-menu-content active">
-            <div class="server-time-container">
-                <h2>서버 시간</h2>
-                <div class="url-input-group">
-                    <input type="text" id="url-input" placeholder="예: naver.com 또는 interpark.com" onkeydown="if(event.key==='Enter') fetchServerTime()">
-                    <button class="btn fn" onclick="fetchServerTime()">시간 확인</button>
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- 1. 서버 시간 메뉴 -->
+            <div id="server-time-menu" class="main-menu-content active">
+                <div class="server-time-container">
+                    <h2>웹사이트 타임시커 (서버 시간 확인)</h2>
+                    <div class="url-input-group">
+                        <input type="text" id="url-input" placeholder="예: naver.com 또는 interpark.com">
+                        <button class="btn fn">시간 확인</button>
+                    </div>
+                    <div class="large-time-display" id="target-server-time">URL을 입력해주세요</div>
+                    <div class="date-display" id="target-server-date"></div>
+                    <p class="time-desc" id="server-time-desc">수강신청, 티켓팅, 예매에 필수적인 정확한 서버 시간을 확인하세요.</p>
                 </div>
-                <div class="large-time-display" id="target-server-time">URL을 입력해주세요</div>
-                <div class="date-display" id="target-server-date"></div>
-                <p class="time-desc" id="server-time-desc">수강신청, 티켓팅, 예매에 필수적인 정확한 서버 시간을 확인하세요.</p>
-                <div class="alarm-section">
+
+                <div class="alarm-section" style="max-width: 800px; margin: 0 auto; background: var(--panel-bg); color: var(--panel-text-color); padding: 30px; border-radius: 10px; margin-top: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.1);">
                     <h4>⏰ 예약 알람</h4>
                     <div class="alarm-input-row">
                         <input type="time" id="alarm-time-input" step="1">
-                        <button class="btn fn" onclick="setAlarm()">알람 설정</button>
-                        <button class="btn op" id="alarm-cancel-btn" onclick="clearAlarm()" style="display:none">취소</button>
+                        <button class="btn fn">알람 설정</button>
+                        <button class="btn op" id="alarm-cancel-btn" style="display:none">취소</button>
                     </div>
                     <p id="alarm-status"></p>
                 </div>
             </div>
-        </div>
+
+            <!-- 2. 계산기 메뉴 -->
+            <div id="calculator-menu" class="main-menu-content">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="openTab(event, 'scientific-tab')">공학용</button>
+                    <button class="tab-btn" onclick="openTab(event, 'graphing-tab')">그래프 계산기</button>
+                </div>
+                <div id="scientific-tab" class="tab-content active">
+                    <div class="main-container">
+                        <div class="calculator">
+                            <div class="display"><input type="text" id="result" readonly></div>
+                            <div class="controls">
+                                <button class="btn" id="deg-rad-toggle">RAD</button>
+                                <button class="btn" onclick="memoryClear()">MC</button>
+                                <button class="btn" onclick="memoryRecall()">MR</button>
+                                <button class="btn" onclick="memoryAdd()">M+</button>
+                                <button class="btn" onclick="memorySubtract()">M-</button>
+                            </div>
+                            <div class="calculator-grid">
+                                <div class="functions-area">
+                                    <button class="btn fn" onclick="calculate('sin')">sin</button>
+                                    <button class="btn fn" onclick="calculate('cos')">cos</button>
+                                    <button class="btn fn" onclick="calculate('tan')">tan</button>
+                                    <button class="btn fn" onclick="calculate('asin')">asin</button>
+                                    <button class="btn fn" onclick="calculate('acos')">acos</button>
+                                    <button class="btn fn" onclick="calculate('atan')">atan</button>
+                                    <button class="btn fn" onclick="calculate('log')">log</button>
+                                    <button class="btn fn" onclick="calculate('ln')">ln</button>
+                                    <button class="btn fn" onclick="calculate('sqrt')">√</button>
+                                    <button class="btn fn" onclick="calculate('pi')">π</button>
+                                    <button class="btn fn" onclick="calculate('e')">e</button>
+                                    <button class="btn fn" onclick="calculate('pow')">x^y</button>
+                                    <button class="btn fn" onclick="appendOperator('(')">(</button>
+                                    <button class="btn fn" onclick="appendOperator(')')">)</button>
+                                    <button class="btn fn" onclick="calculate('exp')">exp</button>
+                                </div>
+                                <div class="main-pad">
+                                    <div class="basic-area">
+                                        <button class="btn op" onclick="clearDisplay()">C</button>
+                                        <button class="btn op" onclick="deleteChar()">DEL</button>
+                                        <button class="btn op" onclick="appendOperator('/')">/</button>
+                                        <button class="btn num" onclick="appendNumber('7')">7</button>
+                                        <button class="btn num" onclick="appendNumber('8')">8</button>
+                                        <button class="btn num" onclick="appendNumber('9')">9</button>
+                                        <button class="btn num" onclick="appendNumber('4')">4</button>
+                                        <button class="btn num" onclick="appendNumber('5')">5</button>
+                                        <button class="btn num" onclick="appendNumber('6')">6</button>
+                                        <button class="btn num" onclick="appendNumber('1')">1</button>
+                                        <button class="btn num" onclick="appendNumber('2')">2</button>
+                                        <button class="btn num" onclick="appendNumber('3')">3</button>
+                                        <button class="btn num" onclick="appendNumber('0')" style="grid-column: span 2;">0</button>
+                                        <button class="btn num" onclick="appendNumber('.')">.</button>
+                                    </div>
+                                    <div class="operators-area">
+                                        <button class="btn op" onclick="appendOperator('*')">*</button>
+                                        <button class="btn op" onclick="appendOperator('-')">-</button>
+                                        <button class="btn op" onclick="appendOperator('+')">+</button>
+                                        <button class="btn op equals" onclick="evaluateExpression()">=</button>
+                                    </div>
+                                </div>
+                                <div class="handwriting-area collapsed">
+                                    <div class="handwriting-header" id="handwriting-toggle">
+                                        <h4>손글씨</h4><span class="toggle-arrow">▼</span>
+                                    </div>
+                                    <div class="handwriting-content">
+                                        <canvas id="handwriting-canvas" width="140" height="140"></canvas>
+                                        <small>좌클릭: 쓰기 / 우클릭: 인식</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="history-panel">
+                            <h3>계산 기록</h3>
+                            <ul id="history-list"></ul>
+                            <button id="clear-history" onclick="clearHistory()">기록 지우기</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="graphing-tab" class="tab-content">
+                    <div class="graphing-container">
+                        <div class="graphing-inputs">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3>함수 그래프 그리기</h3>
+                                <button class="btn fn" onclick="downloadGraphPDF()">PDF 다운로드</button>
+                            </div>
+                            <div class="func-input-group">
+                                <span>f(x) = </span>
+                                <input type="text" id="func-input" placeholder="예: sin(x) 혹은 x^2" onkeydown="if(event.key==='Enter') plotGraph()">
+                                <button class="btn equals" onclick="plotGraph()">그래프 생성</button>
+                            </div>
+                            <div class="graphing-settings">
+                                <div><label>X 범위 최소:</label> <input type="number" id="x-min" value="-10"></div>
+                                <div><label>X 범위 최대:</label> <input type="number" id="x-max" value="10"></div>
+                            </div>
+                        </div>
+                        <div class="graph-area" id="graph-export-area"><canvas id="graph-canvas"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 파일 변환기 메뉴 -->
+            <div id="file-converter-menu" class="main-menu-content">
+                <div class="file-converter-container">
+                    <h2>📁 파일 확장자 변환기</h2>
+
+                    <div class="conv-tabs">
+                        <button class="conv-tab-btn active" data-panel="image-conv">🖼️ 이미지 변환</button>
+                        <button class="conv-tab-btn" data-panel="data-conv">📄 데이터 변환 (JSON / CSV)</button>
+                        <button class="conv-tab-btn" data-panel="pdf-conv">📑 PDF 변환</button>
+                    </div>
+
+                    <!-- 이미지 변환 패널 -->
+                    <div id="image-conv" class="conv-panel active">
+                        <div class="drop-zone" id="img-drop-zone">
+                            <div class="drop-zone-icon">🖼️</div>
+                            <p>이미지를 드래그하거나 클릭하여 업로드</p>
+                            <small>PNG · JPG · WebP · GIF · BMP 지원</small>
+                            <input type="file" id="img-file-input" accept="image/*" hidden>
+                        </div>
+
+                        <div class="file-info" id="img-file-info" style="display:none">
+                            <span class="file-badge">📄</span>
+                            <span id="img-filename"></span>
+                        </div>
+
+                        <div class="conv-options">
+                            <div class="option-row">
+                                <label>출력 형식:</label>
+                                <div class="format-btns">
+                                    <button class="format-btn active" data-format="image/jpeg">JPG</button>
+                                    <button class="format-btn" data-format="image/png">PNG</button>
+                                    <button class="format-btn" data-format="image/webp">WebP</button>
+                                </div>
+                            </div>
+                            <div class="option-row" id="img-quality-row">
+                                <label>품질:</label>
+                                <input type="range" id="img-quality" min="0.1" max="1" step="0.05" value="0.9">
+                                <span id="img-quality-val">90%</span>
+                            </div>
+                        </div>
+
+                        <button class="btn fn" id="img-convert-btn" disabled>⬇️ 변환 및 다운로드</button>
+
+                        <div id="img-preview-wrap" style="display:none">
+                            <p class="preview-label">미리보기</p>
+                            <img id="img-preview" alt="미리보기">
+                        </div>
+                    </div>
+
+                    <!-- 데이터 변환 패널 -->
+                    <div id="data-conv" class="conv-panel">
+                        <div class="drop-zone" id="data-drop-zone">
+                            <div class="drop-zone-icon">📄</div>
+                            <p>파일을 드래그하거나 클릭하여 업로드</p>
+                            <small>JSON · CSV 지원</small>
+                            <input type="file" id="data-file-input" accept=".json,.csv,.txt" hidden>
+                        </div>
+
+                        <div class="file-info" id="data-file-info" style="display:none">
+                            <span class="file-badge">📄</span>
+                            <span id="data-filename"></span>
+                            <span class="detected-badge">감지된 형식: <b id="detected-format">-</b></span>
+                        </div>
+
+                        <div class="conv-options">
+                            <div class="option-row">
+                                <label>출력 형식:</label>
+                                <div class="format-btns">
+                                    <button class="format-btn active" data-format="json">JSON</button>
+                                    <button class="format-btn" data-format="csv">CSV</button>
+                                    <button class="format-btn" data-format="txt">TXT</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn fn" id="data-convert-btn" disabled>⬇️ 변환 및 다운로드</button>
+
+                        <div id="data-preview-wrap" style="display:none">
+                            <p class="preview-label">파일 미리보기 (처음 600자)</p>
+                            <pre id="data-preview"></pre>
+                        </div>
+                    </div>
+
+                    <!-- PDF 변환 패널 -->
+                    <div id="pdf-conv" class="conv-panel">
+                        <div class="pdf-sub-tabs">
+                            <button class="pdf-sub-btn active" data-sub="img-to-pdf">🖼️ → PDF</button>
+                            <button class="pdf-sub-btn" data-sub="pdf-to-img">PDF → 🖼️ 이미지</button>
+                            <button class="pdf-sub-btn" data-sub="pdf-to-txt">PDF → 📝 텍스트</button>
+                        </div>
+
+                        <!-- 이미지 → PDF -->
+                        <div id="img-to-pdf" class="pdf-sub-panel active">
+                            <div class="drop-zone" id="img2pdf-drop-zone">
+                                <div class="drop-zone-icon">🖼️</div>
+                                <p>이미지를 드래그하거나 클릭 (여러 장 가능)</p>
+                                <small>PNG · JPG · WebP 지원</small>
+                                <input type="file" id="img2pdf-input" accept="image/*" multiple hidden>
+                            </div>
+                            <div id="img2pdf-list" class="img-thumb-list" style="display:none"></div>
+                            <div class="conv-options">
+                                <div class="option-row">
+                                    <label>페이지 크기:</label>
+                                    <div class="format-btns" id="img2pdf-page-btns">
+                                        <button class="format-btn active" data-page="a4">A4</button>
+                                        <button class="format-btn" data-page="letter">Letter</button>
+                                    </div>
+                                </div>
+                                <div class="option-row">
+                                    <label>방향:</label>
+                                    <div class="format-btns" id="img2pdf-orient-btns">
+                                        <button class="format-btn active" data-orient="portrait">세로</button>
+                                        <button class="format-btn" data-orient="landscape">가로</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn fn" id="img2pdf-btn" disabled>⬇️ PDF 생성 및 다운로드</button>
+                        </div>
+
+                        <!-- PDF → 이미지 -->
+                        <div id="pdf-to-img" class="pdf-sub-panel">
+                            <div class="drop-zone" id="pdf2img-drop-zone">
+                                <div class="drop-zone-icon">📑</div>
+                                <p>PDF 파일을 드래그하거나 클릭하여 업로드</p>
+                                <small>.pdf 파일만 지원</small>
+                                <input type="file" id="pdf2img-input" accept=".pdf,application/pdf" hidden>
+                            </div>
+                            <div class="file-info" id="pdf2img-info" style="display:none">
+                                <span class="file-badge">📑</span>
+                                <span id="pdf2img-name"></span>
+                                <span class="detected-badge" id="pdf2img-pages"></span>
+                            </div>
+                            <div class="conv-options">
+                                <div class="option-row">
+                                    <label>출력 형식:</label>
+                                    <div class="format-btns" id="pdf2img-fmt-btns">
+                                        <button class="format-btn active" data-fmt="image/png">PNG</button>
+                                        <button class="format-btn" data-fmt="image/jpeg">JPG</button>
+                                    </div>
+                                </div>
+                                <div class="option-row">
+                                    <label>해상도:</label>
+                                    <div class="format-btns" id="pdf2img-scale-btns">
+                                        <button class="format-btn active" data-scale="1.5">보통</button>
+                                        <button class="format-btn" data-scale="2">고화질</button>
+                                        <button class="format-btn" data-scale="3">최고화질</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn fn" id="pdf2img-btn" disabled>⬇️ 이미지로 변환 (페이지별 다운로드)</button>
+                            <div id="pdf2img-progress" style="display:none; margin-top:16px;">
+                                <p id="pdf2img-prog-text" style="margin:0 0 6px 0; font-size:14px;">변환 중...</p>
+                                <div class="pdf-prog-bar"><div id="pdf2img-prog-fill"></div></div>
+                            </div>
+                        </div>
+
+                        <!-- PDF → 텍스트 -->
+                        <div id="pdf-to-txt" class="pdf-sub-panel">
+                            <div class="drop-zone" id="pdf2txt-drop-zone">
+                                <div class="drop-zone-icon">📑</div>
+                                <p>PDF 파일을 드래그하거나 클릭하여 업로드</p>
+                                <small>텍스트 기반 PDF만 지원 (스캔 이미지 불가)</small>
+                                <input type="file" id="pdf2txt-input" accept=".pdf,application/pdf" hidden>
+                            </div>
+                            <div class="file-info" id="pdf2txt-info" style="display:none">
+                                <span class="file-badge">📑</span>
+                                <span id="pdf2txt-name"></span>
+                            </div>
+                            <button class="btn fn" id="pdf2txt-btn" disabled>⬇️ 텍스트 추출 및 다운로드</button>
+                            <div id="pdf2txt-preview-wrap" style="display:none">
+                                <p class="preview-label">추출된 텍스트 미리보기</p>
+                                <pre id="pdf2txt-preview"></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
 
         <div id="alarm-toast" class="alarm-toast">
             <div class="alarm-toast-icon">🔔</div>
@@ -159,7 +347,7 @@
                 <div class="alarm-toast-title" id="alarm-toast-title"></div>
                 <div class="alarm-toast-time" id="alarm-toast-time"></div>
             </div>
-            <button class="alarm-toast-close" onclick="dismissToast()">✕</button>
+            <button class="alarm-toast-close">✕</button>
         </div>
     </div>
 
@@ -185,31 +373,22 @@
                 });
             }
 
-            // Local Time Display (Top Bar)
-            const localTimeDisplay = document.getElementById('local-time-display');
-            if (localTimeDisplay) {
-                setInterval(() => {
-                    const now = new Date();
-                    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-                    localTimeDisplay.textContent = now.toLocaleString('ko-KR', options);
-                }, 1000);
-            }
-
-            // Initialize correct modules based on active tab
-            initCalculator();
-            initServerTime();
+            // Initialize all modules
+            if (typeof initServerTime === 'function') initServerTime();
+            if (typeof initCalculator === 'function') initCalculator();
+            if (typeof initFileConverter === 'function') initFileConverter();
         });
 
         function openMainMenu(evt, menuName) {
-            let i, menuContent, mainTabLinks;
+            let i, menuContent, gnbButtons;
             menuContent = document.getElementsByClassName("main-menu-content");
             for (i = 0; i < menuContent.length; i++) {
                 menuContent[i].style.display = "none";
                 menuContent[i].classList.remove("active");
             }
-            mainTabLinks = document.getElementsByClassName("main-tab-btn");
-            for (i = 0; i < mainTabLinks.length; i++) {
-                mainTabLinks[i].classList.remove("active");
+            gnbButtons = document.getElementsByClassName("gnb-btn");
+            for (i = 0; i < gnbButtons.length; i++) {
+                gnbButtons[i].classList.remove("active");
             }
             document.getElementById(menuName).style.display = "block";
             document.getElementById(menuName).classList.add("active");
@@ -218,21 +397,23 @@
 
         function openTab(evt, tabName) {
             let i, tabContent, tabBtns;
-            tabContent = document.getElementById('calculator-menu').getElementsByClassName("tab-content");
+            const calculatorMenu = document.getElementById('calculator-menu');
+            tabContent = calculatorMenu.getElementsByClassName("tab-content");
             for (i = 0; i < tabContent.length; i++) {
                 tabContent[i].style.display = "none";
                 tabContent[i].classList.remove("active");
             }
-            tabBtns = document.getElementById('calculator-menu').getElementsByClassName("tab-btn");
+            tabBtns = calculatorMenu.getElementsByClassName("tab-btn");
             for (i = 0; i < tabBtns.length; i++) {
                 tabBtns[i].classList.remove("active");
             }
-            document.getElementById(tabName).style.display = "block";
-            document.getElementById(tabName).classList.add("active");
+            calculatorMenu.querySelector('#' + tabName).style.display = "block";
+            calculatorMenu.querySelector('#' + tabName).classList.add("active");
             evt.currentTarget.classList.add("active");
         }
     </script>
-    <script src="serverTime.js"></script>
-    <script src="calculator.js"></script>
+    <script src="js/serverTime/serverTime.js"></script>
+    <script src="js/calculator/calculator.js"></script>
+    <script src="js/fileConverter/fileConverter.js"></script>
 </body>
 </html>
