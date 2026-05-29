@@ -165,10 +165,10 @@ async function setAlarm() {
     alarmFired = false;
     alarmWarned = false;
 
-    await requestNotificationPermission();
+    const hasPermission = await requestNotificationPermission();
 
     const statusEl = document.getElementById('alarm-status');
-    const permNote = Notification.permission === 'granted' ? '' : ' (브라우저 알림 권한 없음 — 탭 내 팝업만 표시)';
+    const permNote = hasPermission ? '' : ' (브라우저 알림 권한 없음 — 탭 내 팝업만 표시)';
     statusEl.textContent = `🔔 알람 설정됨 → ${alarmTarget}${permNote}`;
     statusEl.style.color = '#5bc0de';
 
