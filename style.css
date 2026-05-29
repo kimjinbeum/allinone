@@ -119,14 +119,15 @@ input:checked + .slider:before { transform: translateX(26px); }
 .tabs {
     display: flex;
     width: 100%;
-    margin-bottom: -10px;
+    margin-bottom: 0; /* 침범 문제 해결 */
     z-index: 10;
 }
 
 .tab-btn {
     background-color: var(--tab-bg);
     color: var(--text-color);
-    border: none;
+    border: 1px solid transparent; /* 테두리 공간 확보 */
+    border-bottom: none; /* 아래쪽 테두리 제거 */
     padding: 12px 24px;
     font-size: 16px;
     cursor: pointer;
@@ -139,16 +140,28 @@ input:checked + .slider:before { transform: translateX(26px); }
 
 .tab-btn:hover { opacity: 1; }
 .tab-btn.active {
-    background-color: var(--tab-active-bg);
+    background-color: var(--panel-bg); /* 활성 탭 배경을 컨텐츠 배경과 통일 */
     opacity: 1;
-    box-shadow: 0px -5px 10px rgba(0,0,0,0.1);
+    border-color: #ccc; /* 활성 탭 테두리 색상 */
 }
-body.dark-mode .tab-btn.active { box-shadow: 0px -5px 10px rgba(0,0,0,0.5); }
+body.dark-mode .tab-btn.active {
+    background-color: var(--panel-bg);
+    border-color: #444;
+}
 
 .tab-content {
     display: none;
     width: 100%;
+    border: 1px solid #ccc; /* 컨텐츠 영역 테두리 */
+    border-top: none; /* 위쪽 테두리 제거 */
+    padding: 20px;
+    background-color: var(--panel-bg);
+    border-radius: 0 10px 10px 10px;
 }
+body.dark-mode .tab-content {
+    border-color: #444;
+}
+
 .tab-content.active { display: block; }
 
 @keyframes fadeEffect {
@@ -167,7 +180,7 @@ body.dark-mode .tab-btn.active { box-shadow: 0px -5px 10px rgba(0,0,0,0.5); }
 
 .calculator {
     background-color: var(--calculator-bg);
-    border-radius: 0 10px 10px 10px;
+    border-radius: 10px;
     padding: 20px;
     box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
     width: 700px;
@@ -232,7 +245,7 @@ body.dark-mode #history-list li:hover { background-color: rgba(255, 255, 255, 0.
 #handwriting-canvas { border: 1px solid #555; background-color: black; cursor: crosshair; display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; border-radius: 5px; }
 
 /* --- Graphing Calculator --- */
-.graphing-container { background-color: var(--panel-bg); border-radius: 0 10px 10px 10px; padding: 30px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2); width: 910px; display: flex; flex-direction: column; gap: 20px; color: var(--panel-text-color); }
+.graphing-container { background-color: var(--panel-bg); border-radius: 10px; padding: 30px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2); width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; color: var(--panel-text-color); }
 .graphing-inputs { display: flex; flex-direction: column; gap: 15px; }
 .graphing-inputs h3 { margin: 0; }
 .func-input-group { display: flex; align-items: center; gap: 10px; }

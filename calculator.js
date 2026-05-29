@@ -16,9 +16,8 @@ let chart; // To hold the chart instance
 let isRadian = true;
 let memory = 0;
 
-// -- Initialization --
-document.addEventListener('DOMContentLoaded', () => {
-    // Only initialize if calculator elements exist
+// -- Initialization for Calculator --
+function initCalculator() {
     if (!resultInput) return;
 
     loadHistory();
@@ -43,13 +42,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if(canvas) {
         canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     }
-});
 
-// -- Angle Mode (DEG/RAD) --
-if(degRadToggle) {
-    degRadToggle.addEventListener('click', () => {
-        isRadian = !isRadian;
-        degRadToggle.textContent = isRadian ? 'RAD' : 'DEG';
+    if(degRadToggle) {
+        degRadToggle.addEventListener('click', () => {
+            isRadian = !isRadian;
+            degRadToggle.textContent = isRadian ? 'RAD' : 'DEG';
+        });
+    }
+    
+    // -- Keyboard Input --
+    document.addEventListener('keydown', function(event) {
+        const calcTab = document.getElementById('calculator-menu');
+        if(!calcTab || calcTab.style.display === 'none') return;
+        
+        if(!resultInput) return;
+
+        if (document.activeElement.id === 'func-input') return;
+
+        const key = event.key;
+        if (/^[0-9.]$/.test(key)) appendNumber(key);
+        else if (['+', '-', '*', '/', '(', ')', '^'].includes(key)) appendOperator(key);
+        else if (key === 'Enter' || key === '=') { event.preventDefault(); evaluateExpression(); }
+        else if (key === 'Backspace') deleteChar();
+        else if (key === 'Escape') clearDisplay();
     });
 }
 
@@ -159,24 +174,6 @@ function memoryRecall() { if(resultInput) resultInput.value = memory; }
 function memoryAdd() { if(resultInput) { try { memory += math.evaluate(resultInput.value || '0'); } catch (e) { resultInput.value = "Error"; } } }
 function memorySubtract() { if(resultInput) { try { memory -= math.evaluate(resultInput.value || '0'); } catch (e) { resultInput.value = "Error"; } } }
 
-// -- Keyboard Input --
-document.addEventListener('keydown', function(event) {
-    // Only process keyboard input if the calculator is visible
-    const calcTab = document.getElementById('calculator-menu');
-    if(calcTab && calcTab.style.display === 'none') return;
-    
-    if(!resultInput) return;
-
-    // Only process if we're not typing in the graph function input
-    if (document.activeElement.id === 'func-input') return;
-
-    const key = event.key;
-    if (/^[0-9.]$/.test(key)) appendNumber(key);
-    else if (['+', '-', '*', '/', '(', ')', '^'].includes(key)) appendOperator(key);
-    else if (key === 'Enter' || key === '=') { event.preventDefault(); evaluateExpression(); }
-    else if (key === 'Backspace') deleteChar();
-    else if (key === 'Escape') clearDisplay();
-});
 
 // ==========================================
 // Handwriting Recognition (Tesseract.js)
@@ -268,7 +265,6 @@ function stopDrawing() {
     }
 }
 
-// -- 후보 숫자 UI --
 function showCandidates(candidates) {
     document.getElementById('candidates')?.remove();
 
@@ -303,7 +299,6 @@ function showCandidates(candidates) {
     if(handwritingArea) handwritingArea.appendChild(div);
 }
 
-// -- Tesseract 인식 --
 async function recognizeDigit() {
     if(!ctx || !canvas) return;
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -371,7 +366,7 @@ function plotGraph() {
 
         const labels = [];
         const data = [];
-        const step = (xMax - xMin) / 200; // Increase points for a smoother curve
+        const step = (xMax - xMin) / 200;
 
         for (let x = xMin; x <= xMax; x += step) {
             labels.push(x.toFixed(2));
@@ -426,26 +421,22 @@ function downloadGraphPDF() {
 
     const graphArea = document.getElementById('graph-export-area');
     
-    // Use html2canvas to render the graph area to a canvas
     html2canvas(graphArea, {
-        backgroundColor: '#ffffff', // Ensure background is white for PDF
-        scale: 2 // Increase resolution
+        backgroundColor: '#ffffff',
+        scale: 2
     }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         
-        // Add title
         pdf.setFontSize(20);
         pdf.text(`Graph of f(x) = ${funcInput}`, pdfWidth / 2, 40, { align: 'center' });
 
-        // Add image of the graph
         const imgProps = pdf.getImageProperties(imgData);
         const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
         const yPos = (pdfHeight - imgHeight) / 2;
         pdf.addImage(imgData, 'PNG', 0, yPos, pdfWidth, imgHeight);
 
-        // Save the PDF
         pdf.save(`graph-${funcInput.replace(/[^a-z0-9]/gi, '_')}.pdf`);
     });
 }
