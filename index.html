@@ -113,14 +113,14 @@
                         <span>점수: <span id="game-score">0</span></span>
                         <span>레벨: <span id="game-level">1</span></span>
                     </div>
-                    <div class="game-canvas-container">
-                        <canvas id="space-invaders-canvas" width="600" height="400"></canvas>
-                        <div id="game-over-section" style="display:none;">
-                            <h3>게임 오버!</h3>
-                            <p>다시 시작하려면 Enter를 누르세요.</p>
+                    <div class="game-canvas-container" style="position: relative; display: flex; justify-content: center; align-items: center;">
+                        <canvas id="space-invaders-canvas" width="600" height="1200"></canvas>
+                        <div id="game-over-section" style="display:none; position: absolute; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10; top: 0; left: 0;">
+                            <h3 style="color: white; font-size: 2.5rem; margin: 0 0 10px 0;">게임 오버!</h3>
+                            <p style="color: #ddd; margin-bottom: 80px;">다시 시작하려면 Enter를 누르세요.</p>
                         </div>
+                        <button class="btn fn" id="game-start-btn" style="position: absolute; z-index: 20; padding: 15px 30px; font-size: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); top: 55%; left: 50%; transform: translate(-50%, -50%); border-radius: 8px;">게임 시작 (Enter)</button>
                     </div>
-                    <button class="btn fn" id="game-start-btn">게임 시작 (Enter)</button>
                     <p class="game-controls-info">
                         ↑ ↓ ← → : 이동, Spacebar : 발사 (모바일: 화면 터치 및 드래그)
                     </p>

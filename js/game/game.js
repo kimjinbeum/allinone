@@ -11,9 +11,63 @@ function initGame() {
 
     const ctx = canvas.getContext('2d');
     
-    // 캔버스 사이즈 확장 및 브라우저 창 상하 꽉 채우기
-    canvas.width = Math.min(window.innerWidth, 800); // 모바일 지원을 위해 화면 크기에 맞춤
-    canvas.height = (window.innerHeight - 20) * 2; // 세로 크기를 현재 화면의 두 배로 확장
+    // 1. 게임 내부 해상도 완전 고정: 세로를 가로의 2배(1:2)로 길게 변경하여 세로 길이를 체감되도록 확장
+    canvas.width = 600;
+    canvas.height = 1200;
+    
+    // 2. 화면 크기에 맞춰 CSS 디스플레이 사이즈만 동적으로 조절 (중앙 정렬, 부모 영역 맞춤, 스크롤 완벽 차단)
+    function resizeCanvas() {
+        // 브라우저 전체 및 내부 컨테이너 세로 스크롤바 생성 원천 차단
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        
+        const availableWidth = window.innerWidth - 40;
+        const availableHeight = window.innerHeight - 280; // 상단 제목, 점수판, 하단 조작설명 등의 총 높이를 넉넉히 빼주어 화면 밖으로 밀려나는 스크롤 현상 완벽 방지
+        
+        let scale = Math.min(availableWidth / canvas.width, availableHeight / canvas.height);
+        // 크기 상한선(scale > 1)을 삭제하여 해상도가 큰 모니터/기기에서는 화면에 꽉 차게 커지도록 허용
+        
+        // 캔버스 자체를 화면 한가운데로 중앙 정렬
+        canvas.style.display = 'block';
+        canvas.style.margin = '0 auto';
+        
+        const finalWidth = Math.floor(canvas.width * scale);
+        const finalHeight = Math.floor(canvas.height * scale);
+        canvas.style.width = finalWidth + 'px';
+        canvas.style.height = finalHeight + 'px'; // 600 고정을 풀고 올바른 1:2 비율의 세로 높이 적용
+        
+        // 부모 흰색 배경(.game-container)이 CSS 제한 때문에 안 커지는 현상 무력화 및 캔버스 핏에 맞춤
+        const gameContainer = document.querySelector('.game-container');
+        if (gameContainer) {
+            gameContainer.style.maxWidth = 'none'; // 기존 CSS 너비 제한 강제 해제
+            gameContainer.style.maxHeight = 'none'; // CSS 최대 높이 제한 해제 (흰색 카드가 길어지도록)
+            gameContainer.style.width = 'fit-content'; // 내부 게임 화면(캔버스) 크기에 흰색 배경을 딱 맞춤
+            gameContainer.style.margin = '0 auto'; // 화면 정중앙에 배치
+            gameContainer.style.height = 'auto'; // 고정 높이 속성 완전 해제
+            gameContainer.style.minHeight = 'fit-content'; // 캔버스 세로 길이에 맞춰 무조건 늘어나게 보장
+            gameContainer.style.overflow = 'hidden'; // 미세하게 삐져나오는 여백을 숨겨 내부 스크롤 차단
+        }
+        
+        // 캔버스를 직접 감싸는 컨테이너 영역의 제한도 해제
+        const canvasContainer = document.querySelector('.game-canvas-container');
+        if (canvasContainer) {
+            canvasContainer.style.maxHeight = 'none';
+            canvasContainer.style.height = 'auto';
+        }
+        
+        // 최상위 메뉴 영역도 가운데 정렬되도록 지원
+        const menuContainer = document.getElementById('space-invaders-menu');
+        if (menuContainer) {
+            menuContainer.style.width = '100%';
+            menuContainer.style.height = 'auto';
+            menuContainer.style.maxHeight = 'none';
+            menuContainer.style.overflow = 'hidden';
+            // 강제로 display 속성을 변경하면 다른 탭(화면)일 때도 노출되는 버그가 생기므로 제거
+        }
+    }
+    
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); // 초기 1회 실행
 
     const scoreEl = document.getElementById('game-score');
     const levelEl = document.getElementById('game-level');
@@ -392,8 +446,14 @@ function initGame() {
     // 터치 시 플레이어 위치 업데이트 (손가락에 가리지 않게 약간 위로 조정)
     function updatePlayerPositionByTouch(touch) {
         const rect = canvas.getBoundingClientRect();
-        const touchX = touch.clientX - rect.left;
-        const touchY = touch.clientY - rect.top;
+        
+        // 축소/확대된 화면 비율(Scale) 계산
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        
+        // 실제 화면 터치 픽셀 위치를 600x900 게임 내부 좌표로 변환
+        const touchX = (touch.clientX - rect.left) * scaleX;
+        const touchY = (touch.clientY - rect.top) * scaleY;
         
         player.x = touchX - player.width / 2;
         player.y = touchY - player.height - 40; 
