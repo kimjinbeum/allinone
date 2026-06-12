@@ -21,10 +21,10 @@ function initGame() {
         document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
         
-        // 모바일 기기인지 판별하여 여백을 다르게 적용
+        // 모바일 기기인지 판별 (흰색 카드 패딩값까지 고려하여 가로 여백을 넉넉히 확보)
         const isMobile = window.innerWidth <= 768;
-        const marginX = isMobile ? 20 : 40; // 모바일은 가로 여백을 최소화하여 캔버스를 꽉 차게
-        const marginY = isMobile ? 200 : 280; // 모바일 환경을 고려하여 상하단 UI 높이 여백 축소
+        const marginX = isMobile ? 60 : 80; 
+        const marginY = isMobile ? 220 : 280; 
         
         const availableWidth = window.innerWidth - marginX;
         const availableHeight = window.innerHeight - marginY;
@@ -40,14 +40,15 @@ function initGame() {
         canvas.style.width = finalWidth + 'px';
         canvas.style.height = finalHeight + 'px'; 
         canvas.style.maxWidth = '100%'; // 캔버스가 화면을 뚫고 나가는 것 추가 방지
+        canvas.style.objectFit = 'contain'; // 가로가 축소될 때 캔버스 찌그러짐 방지
         
         // 부모 흰색 배경(.game-container)이 CSS 제한 때문에 안 커지는 현상 무력화 및 캔버스 핏에 맞춤
         const gameContainer = document.querySelector('.game-container');
         if (gameContainer) {
-            gameContainer.style.maxWidth = '100%'; // 텍스트 길이 등으로 인해 모바일 화면을 뚫고 나가는 현상 완벽 방지
+            gameContainer.style.width = '100%'; // fit-content 대신 100%로 변경하여 강제 반응형 축소 유도
+            gameContainer.style.maxWidth = (finalWidth + 40) + 'px'; // 캔버스 폭 + 내부 패딩만큼만 허용
             gameContainer.style.boxSizing = 'border-box'; // 패딩 포함 크기 계산
             gameContainer.style.maxHeight = 'none'; // CSS 최대 높이 제한 해제 (흰색 카드가 길어지도록)
-            gameContainer.style.width = 'fit-content'; // 내부 게임 화면(캔버스) 크기에 흰색 배경을 딱 맞춤
             gameContainer.style.margin = '0 auto'; // 화면 정중앙에 배치
             gameContainer.style.height = 'auto'; // 고정 높이 속성 완전 해제
             gameContainer.style.minHeight = 'fit-content'; // 캔버스 세로 길이에 맞춰 무조건 늘어나게 보장
@@ -56,10 +57,19 @@ function initGame() {
             gameContainer.style.whiteSpace = 'normal';
         }
         
+        // 상단 점수판 텍스트가 컨테이너를 강제로 넓히는 것 방지
+        const infoBar = document.querySelector('.game-info-bar');
+        if (infoBar) {
+            infoBar.style.display = 'flex';
+            infoBar.style.flexWrap = 'wrap'; // 좁으면 점수와 레벨이 자연스럽게 줄바꿈됨
+            infoBar.style.justifyContent = 'space-between';
+        }
+
         // 캔버스를 직접 감싸는 컨테이너 영역의 제한도 해제
         const canvasContainer = document.querySelector('.game-canvas-container');
         if (canvasContainer) {
             canvasContainer.style.maxHeight = 'none';
+            canvasContainer.style.maxWidth = '100%';
             canvasContainer.style.height = 'auto';
         }
         
