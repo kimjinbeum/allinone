@@ -21,11 +21,15 @@ function initGame() {
         document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
         
-        const availableWidth = window.innerWidth - 40;
-        const availableHeight = window.innerHeight - 280; // 상단 제목, 점수판, 하단 조작설명 등의 총 높이를 넉넉히 빼주어 화면 밖으로 밀려나는 스크롤 현상 완벽 방지
+        // 모바일 기기인지 판별하여 여백을 다르게 적용
+        const isMobile = window.innerWidth <= 768;
+        const marginX = isMobile ? 20 : 40; // 모바일은 가로 여백을 최소화하여 캔버스를 꽉 차게
+        const marginY = isMobile ? 200 : 280; // 모바일 환경을 고려하여 상하단 UI 높이 여백 축소
+        
+        const availableWidth = window.innerWidth - marginX;
+        const availableHeight = window.innerHeight - marginY;
         
         let scale = Math.min(availableWidth / canvas.width, availableHeight / canvas.height);
-        // 크기 상한선(scale > 1)을 삭제하여 해상도가 큰 모니터/기기에서는 화면에 꽉 차게 커지도록 허용
         
         // 캔버스 자체를 화면 한가운데로 중앙 정렬
         canvas.style.display = 'block';
@@ -34,18 +38,22 @@ function initGame() {
         const finalWidth = Math.floor(canvas.width * scale);
         const finalHeight = Math.floor(canvas.height * scale);
         canvas.style.width = finalWidth + 'px';
-        canvas.style.height = finalHeight + 'px'; // 600 고정을 풀고 올바른 1:2 비율의 세로 높이 적용
+        canvas.style.height = finalHeight + 'px'; 
+        canvas.style.maxWidth = '100%'; // 캔버스가 화면을 뚫고 나가는 것 추가 방지
         
         // 부모 흰색 배경(.game-container)이 CSS 제한 때문에 안 커지는 현상 무력화 및 캔버스 핏에 맞춤
         const gameContainer = document.querySelector('.game-container');
         if (gameContainer) {
-            gameContainer.style.maxWidth = 'none'; // 기존 CSS 너비 제한 강제 해제
+            gameContainer.style.maxWidth = '100%'; // 텍스트 길이 등으로 인해 모바일 화면을 뚫고 나가는 현상 완벽 방지
+            gameContainer.style.boxSizing = 'border-box'; // 패딩 포함 크기 계산
             gameContainer.style.maxHeight = 'none'; // CSS 최대 높이 제한 해제 (흰색 카드가 길어지도록)
             gameContainer.style.width = 'fit-content'; // 내부 게임 화면(캔버스) 크기에 흰색 배경을 딱 맞춤
             gameContainer.style.margin = '0 auto'; // 화면 정중앙에 배치
             gameContainer.style.height = 'auto'; // 고정 높이 속성 완전 해제
             gameContainer.style.minHeight = 'fit-content'; // 캔버스 세로 길이에 맞춰 무조건 늘어나게 보장
             gameContainer.style.overflow = 'hidden'; // 미세하게 삐져나오는 여백을 숨겨 내부 스크롤 차단
+            gameContainer.style.wordWrap = 'break-word'; // 긴 텍스트(조작 설명 등)가 박스를 뚫지 않고 자연스럽게 줄바꿈되도록 유도
+            gameContainer.style.whiteSpace = 'normal';
         }
         
         // 캔버스를 직접 감싸는 컨테이너 영역의 제한도 해제
@@ -62,6 +70,7 @@ function initGame() {
             menuContainer.style.height = 'auto';
             menuContainer.style.maxHeight = 'none';
             menuContainer.style.overflow = 'hidden';
+            menuContainer.style.boxSizing = 'border-box';
             // 강제로 display 속성을 변경하면 다른 탭(화면)일 때도 노출되는 버그가 생기므로 제거
         }
     }
