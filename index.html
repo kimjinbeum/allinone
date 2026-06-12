@@ -40,9 +40,23 @@
                 <button class="gnb-close-btn" id="gnb-close-btn" aria-label="메뉴 닫기">✕</button>
             </div>
             <ul class="gnb-menu">
-                <li><button class="gnb-btn active" onclick="openMainMenu(event, 'server-time-menu')">⏰ 서버 시간</button></li>
-                <li><button class="gnb-btn" onclick="openMainMenu(event, 'calculator-menu')">🧮 계산기</button></li>
-                <li><button class="gnb-btn" onclick="openMainMenu(event, 'file-converter-menu')">🔄 파일 변환기</button></li>
+                <li class="gnb-depth1">
+                    <!-- 게임 카테고리가 기본적으로 활성화되도록 수정 -->
+                    <button class="gnb-category-btn active">🎮 게임</button>
+                    <ul class="gnb-depth2" style="display: block;">
+                        <!-- 샘플 게임 메뉴 -->
+                        <li><button class="gnb-btn active" onclick="openMainMenu(event, 'game-list-menu')">🕹️ 게임 리스트</button></li>
+                        <li><button class="gnb-btn" onclick="openMainMenu(event, 'space-invaders-menu')">👾 우주 침략자</button></li>
+                    </ul>
+                </li>
+                <li class="gnb-depth1">
+                    <button class="gnb-category-btn">🛠️ 편의 기능</button>
+                    <ul class="gnb-depth2" style="display: none;">
+                        <li><button class="gnb-btn" onclick="openMainMenu(event, 'server-time-menu')">⏰ 서버 시간</button></li>
+                        <li><button class="gnb-btn" onclick="openMainMenu(event, 'calculator-menu')">🧮 계산기</button></li>
+                        <li><button class="gnb-btn" onclick="openMainMenu(event, 'file-converter-menu')">🔄 파일 변환기</button></li>
+                    </ul>
+                </li>
             </ul>
             <div class="gnb-footer">
                 <div class="theme-switcher">
@@ -57,8 +71,65 @@
 
         <!-- Main Content Area -->
         <main class="content-area">
+            <!-- 0. 게임 리스트 메뉴 (디폴트) -->
+            <div id="game-list-menu" class="main-menu-content active">
+                <div class="game-list-container">
+                    <h2>🎮 인기 게임 리스트</h2>
+                    <p>다양한 미니 게임들을 브라우저에서 바로 즐겨보세요!</p>
+
+                    <div class="game-grid">
+                        <!-- 게임 카드 샘플 1 -->
+                        <div class="game-card" onclick="openMainMenu(event, 'space-invaders-menu')">
+                            <div class="game-icon">👾</div>
+                            <h3>우주 침략자</h3>
+                            <p>간단한 슈팅 게임으로 스트레스를 날려보세요.</p>
+                            <span class="btn fn">플레이 하기</span>
+                        </div>
+
+                        <!-- 게임 카드 샘플 2 (준비중) -->
+                        <div class="game-card disabled">
+                            <div class="game-icon">🐍</div>
+                            <h3>스네이크</h3>
+                            <p>고전 뱀 꼬리잡기 게임 (준비 중입니다)</p>
+                            <span class="btn op">업데이트 예정</span>
+                        </div>
+
+                        <!-- 게임 카드 샘플 3 (준비중) -->
+                        <div class="game-card disabled">
+                            <div class="game-icon">🧩</div>
+                            <h3>테트리스</h3>
+                            <p>블록을 맞춰 점수를 획득하세요 (준비 중입니다)</p>
+                            <span class="btn op">업데이트 예정</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 0-1. 우주 침략자 게임 화면 -->
+            <div id="space-invaders-menu" class="main-menu-content">
+                <div class="game-container">
+                    <h2>👾 우주 침략자</h2>
+                    <div class="game-info-bar">
+                        <span>점수: <span id="game-score">0</span></span>
+                        <span>레벨: <span id="game-level">1</span></span>
+                    </div>
+                    <div class="game-canvas-container">
+                        <canvas id="space-invaders-canvas" width="600" height="400"></canvas>
+                        <div id="game-over-section" style="display:none;">
+                            <h3>게임 오버!</h3>
+                            <p>다시 시작하려면 Enter를 누르세요.</p>
+                        </div>
+                    </div>
+                    <button class="btn fn" id="game-start-btn">게임 시작 (Enter)</button>
+                    <p class="game-controls-info">
+                        ↑ ↓ ← → : 이동, Spacebar : 발사 (모바일: 화면 터치 및 드래그)
+                    </p>
+                </div>
+            </div>
+
+
             <!-- 1. 서버 시간 메뉴 -->
-            <div id="server-time-menu" class="main-menu-content active">
+            <div id="server-time-menu" class="main-menu-content">
                 <div class="server-time-container">
                     <h2>웹사이트 타임시커 (서버 시간 확인)</h2>
                     <div class="url-input-group">
@@ -366,7 +437,7 @@
                 <div class="alarm-toast-title" id="alarm-toast-title"></div>
                 <div class="alarm-toast-time" id="alarm-toast-time"></div>
             </div>
-            <button class="alarm-toast-close">✕</button>
+            <button class="alarm-toast-close" onclick="dismissToast()">✕</button>
         </div>
     </div>
 
@@ -414,7 +485,30 @@
                 });
             }
 
+            // GNB Accordion
+            const categoryBtns = document.querySelectorAll('.gnb-category-btn');
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const subMenu = btn.nextElementSibling;
+                    const wasActive = btn.classList.contains('active');
+
+                    // Close all categories
+                    categoryBtns.forEach(b => {
+                        b.classList.remove('active');
+                        b.nextElementSibling.style.display = 'none';
+                    });
+
+                    // Open the clicked one if it wasn't already open
+                    if (!wasActive) {
+                        btn.classList.add('active');
+                        subMenu.style.display = 'block';
+                    }
+                });
+            });
+
+
             // Initialize all modules
+            if (typeof initGame === 'function') initGame(); // Game module
             if (typeof initServerTime === 'function') initServerTime();
             if (typeof initCalculator === 'function') initCalculator();
             if (typeof initFileConverter === 'function') initFileConverter();
@@ -427,13 +521,26 @@
                 menuContent[i].style.display = "none";
                 menuContent[i].classList.remove("active");
             }
-            gnbButtons = document.getElementsByClassName("gnb-btn");
+            gnbButtons = document.querySelectorAll(".gnb-btn");
             for (i = 0; i < gnbButtons.length; i++) {
                 gnbButtons[i].classList.remove("active");
             }
             document.getElementById(menuName).style.display = "block";
             document.getElementById(menuName).classList.add("active");
-            evt.currentTarget.classList.add("active");
+
+            // 탭 버튼 클릭 시 활성화 클래스 추가
+            if (evt) {
+                evt.currentTarget.classList.add("active");
+
+                // 클릭된 버튼이 속한 카테고리를 찾아 활성화 (선택 사항)
+                const parentUl = evt.currentTarget.closest('.gnb-depth2');
+                if (parentUl) {
+                    const categoryBtn = parentUl.previousElementSibling;
+                    if (categoryBtn && !categoryBtn.classList.contains('active')) {
+                        categoryBtn.click();
+                    }
+                }
+            }
 
             // Close mobile nav on menu selection
             if (window.innerWidth <= 900) {
@@ -462,8 +569,9 @@
             evt.currentTarget.classList.add("active");
         }
     </script>
-    <script src="js/serverTime/serverTime.js"></script>
-    <script src="js/calculator/calculator.js"></script>
-    <script src="js/fileConverter/fileConverter.js"></script>
+    <script src="js/utils/serverTime.js"></script>
+    <script src="js/utils/calculator.js"></script>
+    <script src="js/utils/fileConverter.js"></script>
+    <script src="js/game/game.js"></script>
 </body>
 </html>
