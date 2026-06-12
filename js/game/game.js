@@ -99,13 +99,14 @@ function initGame() {
     const bossIcons = ['👹','👺','🐲','🐙','🦑','🦖','🦍','🦈','🐅','🐊'];
     const itemWeaponIcon = '⚡';
     const itemLifeIcon = '❤️';
+    const itemBombIcon = '💣';
 
     // --- Game Objects ---
     const player = {
-        x: canvas.width / 2 - 20,
-        y: canvas.height - 40,
-        width: 40,
-        height: 40,
+        x: canvas.width / 2 - 30,
+        y: canvas.height - 60,
+        width: 60,
+        height: 60,
         speed: 5,
         dx: 0,
         dy: 0, // 상하 이동 속도 추가
@@ -122,7 +123,7 @@ function initGame() {
             ctx.save();
             ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
             ctx.rotate(-45 * Math.PI / 180);
-            ctx.font = '36px Arial';
+            ctx.font = '54px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(playerIcon, 0, 0);
@@ -156,25 +157,28 @@ function initGame() {
     // --- Game Functions ---
     function fireBullets() {
         const now = Date.now();
-        if (now - player.lastShotTime < 150) return; // 연사 방지 쿨다운 (150ms)
+        if (now - player.lastShotTime < 200) return; // 연사 방지 쿨다운 (200ms로 약간 증가)
         player.lastShotTime = now;
 
         const bSpeed = 8;
         const dmg = player.weaponLevel; // 아이템 먹을 시 미사일 1발당 데미지 1씩 증가
+        const bw = 8; // 미사일 폭 키움
+        const bh = 25; // 미사일 길이 키움
+        
         if (player.weaponLevel === 1) {
-            bullets.push({ x: player.x + player.width / 2 - 2, y: player.y, width: 4, height: 15, speed: bSpeed, damage: dmg });
+            bullets.push({ x: player.x + 26, y: player.y, width: bw, height: bh, speed: bSpeed, damage: dmg });
         } else if (player.weaponLevel === 2) {
-            bullets.push({ x: player.x + player.width / 2 - 12, y: player.y, width: 4, height: 15, speed: bSpeed, damage: dmg });
-            bullets.push({ x: player.x + player.width / 2 + 8, y: player.y, width: 4, height: 15, speed: bSpeed, damage: dmg });
+            bullets.push({ x: player.x + 12, y: player.y, width: bw, height: bh, speed: bSpeed, damage: dmg });
+            bullets.push({ x: player.x + 40, y: player.y, width: bw, height: bh, speed: bSpeed, damage: dmg });
         } else {
-            bullets.push({ x: player.x + player.width / 2 - 2, y: player.y - 10, width: 4, height: 15, speed: bSpeed, damage: dmg });
-            bullets.push({ x: player.x + player.width / 2 - 15, y: player.y, width: 4, height: 15, speed: bSpeed, damage: dmg });
-            bullets.push({ x: player.x + player.width / 2 + 11, y: player.y, width: 4, height: 15, speed: bSpeed, damage: dmg });
+            bullets.push({ x: player.x + 26, y: player.y - 10, width: bw, height: bh, speed: bSpeed, damage: dmg });
+            bullets.push({ x: player.x + 6, y: player.y, width: bw, height: bh, speed: bSpeed, damage: dmg });
+            bullets.push({ x: player.x + 46, y: player.y, width: bw, height: bh, speed: bSpeed, damage: dmg });
         }
     }
 
     function spawnNormalEnemy() {
-        const size = 35;
+        const size = 50; // 일반 몬스터 크기 증가
         const x = Math.random() * (canvas.width - size);
         const hp = 1 + Math.floor(level / 5);
         const speed = 2 + (level * 0.1) + Math.random();
@@ -187,10 +191,10 @@ function initGame() {
 
     function spawnBoss() {
         isBossSpawned = true;
-        const size = 100;
+        const size = 140; // 보스 몬스터 크기 증가
         const bIcon = bossIcons[(level - 1) % bossIcons.length];
-        // 보스 피통 1000 + 스테이지 비례
-        const bossHp = 1000 + ((level - 1) * 300); 
+        // 보스 피통 공식 적용: 1~10단:100, 11~20단:200 ... 41~50단:500
+        const bossHp = Math.floor((level - 1) / 10) * 100 + 100;
         
         enemies.push({
             x: canvas.width / 2 - size / 2, y: -size, 
@@ -204,7 +208,7 @@ function initGame() {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         enemies.forEach(enemy => {
-            ctx.font = enemy.isBoss ? '80px Arial' : '35px Arial';
+            ctx.font = enemy.isBoss ? '110px Arial' : '50px Arial';
             ctx.fillText(enemy.icon, enemy.x + enemy.width / 2, enemy.y + enemy.height / 2);
         });
     }
@@ -218,10 +222,10 @@ function initGame() {
         const speed = isBoss ? 5 + (level * 0.2) : 3 + (level * 0.1);
         
         enemyBullets.push({
-            x: sourceX - 3,
+            x: sourceX - (isBoss ? 8 : 5),
             y: sourceY,
-            width: isBoss ? 10 : 6, 
-            height: isBoss ? 20 : 12,
+            width: isBoss ? 16 : 10, 
+            height: isBoss ? 32 : 20, // 적 미사일 크기 증가
             dx: Math.cos(angle) * speed,
             dy: Math.sin(angle) * speed
         });
@@ -239,8 +243,8 @@ function initGame() {
                     if (enemy.x < 0 || enemy.x + enemy.width > canvas.width) {
                         enemy.dx *= -1;
                     }
-                    // 보스 미사일 발사 (스테이지 상승 시 확률 증가)
-                    if (Math.random() < 0.03 + (level * 0.005)) {
+                    // 보스 미사일 발사 (기존 대비 확률 반으로 줄임)
+                    if (Math.random() < 0.015 + (level * 0.002)) {
                         fireTargetedBullet(enemy.x + enemy.width / 2, enemy.y + enemy.height, true);
                     }
                 }
@@ -250,8 +254,8 @@ function initGame() {
                     enemies.splice(i, 1); // 화면 밖으로 나가면 삭제
                     continue;
                 }
-                // 일반 몬스터 미사일 발사
-                if (Math.random() < 0.005 + (level * 0.001)) {
+                // 일반 몬스터 미사일 발사 (기존 대비 확률 반으로 줄임)
+                if (Math.random() < 0.002 + (level * 0.0005)) {
                     fireTargetedBullet(enemy.x + enemy.width / 2, enemy.y + enemy.height, false);
                 }
             }
@@ -279,9 +283,13 @@ function initGame() {
                     if (e.hp <= 0) {
                         let dropChance = Math.random();
                         if (dropChance < 0.20 && !e.isBoss) { // 보스가 아닐때만 아이템 드랍
+                            let dropType = 'weapon';
+                            if (dropChance < 0.05) dropType = 'bomb';
+                            else if (dropChance < 0.12) dropType = 'life';
+                            
                             items.push({
-                                x: e.x + e.width / 2 - 10, y: e.y + e.height / 2, width: 20, height: 20,
-                                type: dropChance < 0.10 ? 'weapon' : 'life', speed: 2
+                                x: e.x + e.width / 2 - 15, y: e.y + e.height / 2, width: 30, height: 30,
+                                type: dropType, speed: 2
                             });
                         }
                         score += (e.isBoss ? 1000 : 10) * level;
@@ -314,6 +322,17 @@ function initGame() {
                 item.y < player.y + player.height && item.y + item.height > player.y) {
                 if (item.type === 'weapon') player.weaponLevel = Math.min(player.weaponLevel + 1, 3);
                 else if (item.type === 'life') player.lives++;
+                else if (item.type === 'bomb') {
+                    // 폭탄 획득 시: 적 미사일 및 일반 몬스터 전체 초기화
+                    enemyBullets.length = 0;
+                    for (let j = enemies.length - 1; j >= 0; j--) {
+                        if (!enemies[j].isBoss) {
+                            score += 10 * level; // 터진 몬스터 점수도 획득
+                            enemies.splice(j, 1);
+                        }
+                    }
+                    scoreEl.textContent = score;
+                }
                 items.splice(i, 1);
             }
         }
@@ -365,7 +384,7 @@ function initGame() {
         
         if (!isBossSpawned && timeLeft <= 0) {
             spawnBoss();
-        } else if (!isBossSpawned && Math.random() < 0.02 + (level * 0.002)) {
+        } else if (!isBossSpawned && Math.random() < 0.01 + (level * 0.001)) { // 몬스터 생성 확률 절반으로 감소
             spawnNormalEnemy();
         }
 
@@ -397,13 +416,18 @@ function initGame() {
             if (eb.y > canvas.height || eb.y < 0 || eb.x < 0 || eb.x > canvas.width) enemyBullets.splice(i, 1);
         }
 
-        ctx.font = '20px Arial';
+        ctx.font = '30px Arial'; // 아이템 크기 약간 증가
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
         for (let i = items.length - 1; i >= 0; i--) {
             let item = items[i];
             item.y += item.speed;
-            ctx.fillText(item.type === 'weapon' ? itemWeaponIcon : itemLifeIcon, item.x, item.y);
+            
+            let iIcon = itemWeaponIcon;
+            if (item.type === 'life') iIcon = itemLifeIcon;
+            if (item.type === 'bomb') iIcon = itemBombIcon;
+            
+            ctx.fillText(iIcon, item.x, item.y);
             if (item.y > canvas.height) items.splice(i, 1);
         }
 
