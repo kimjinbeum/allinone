@@ -941,7 +941,7 @@ body.dark-mode #history-list li:hover { background-color: rgba(255, 255, 255, 0.
     max-width: 100%;
 }
 
-#space-invaders-canvas {
+#space-invaders-canvas, #snake-canvas {
     background-color: black;
     border: 2px solid var(--gnb-active);
     display: block;
@@ -955,7 +955,7 @@ body.dark-mode #history-list li:hover { background-color: rgba(255, 255, 255, 0.
     font-weight: bold;
 }
 
-#game-over-section {
+#game-over-section, #snake-game-over-section {
     background-color: rgba(0,0,0,0.8);
     color: white;
     position: absolute;
@@ -970,13 +970,13 @@ body.dark-mode #history-list li:hover { background-color: rgba(255, 255, 255, 0.
     z-index: 10;
 }
 
-#game-over-section h3 {
+#game-over-section h3, #snake-game-over-section h3 {
     font-size: 2.5rem;
     color: #d9534f;
     margin-bottom: 10px;
 }
 
-#game-over-section p {
+#game-over-section p, #snake-game-over-section p {
     font-size: 1.2rem;
 }
 

@@ -47,6 +47,7 @@
                         <!-- 샘플 게임 메뉴 -->
                         <li><button class="gnb-btn active" onclick="openMainMenu(event, 'game-list-menu')">🕹️ 게임 리스트</button></li>
                         <li><button class="gnb-btn" onclick="openMainMenu(event, 'space-invaders-menu')">👾 우주 침략자</button></li>
+                        <li><button class="gnb-btn" onclick="openMainMenu(event, 'snake-game-menu')">🐍 스네이크</button></li>
                     </ul>
                 </li>
                 <li class="gnb-depth1">
@@ -86,12 +87,12 @@
                             <span class="btn fn">플레이 하기</span>
                         </div>
 
-                        <!-- 게임 카드 샘플 2 (준비중) -->
-                        <div class="game-card disabled">
+                        <!-- 게임 카드 샘플 2 -->
+                        <div class="game-card" onclick="openMainMenu(event, 'snake-game-menu')">
                             <div class="game-icon">🐍</div>
                             <h3>스네이크</h3>
-                            <p>고전 뱀 꼬리잡기 게임 (준비 중입니다)</p>
-                            <span class="btn op">업데이트 예정</span>
+                            <p>3D-like 뱀 게임! 사과를 먹고 몸집을 키우세요.</p>
+                            <span class="btn fn">플레이 하기</span>
                         </div>
 
                         <!-- 게임 카드 샘플 3 (준비중) -->
@@ -123,6 +124,28 @@
                     </div>
                     <p class="game-controls-info">
                         ↑ ↓ ← → : 이동, Spacebar : 발사 (모바일: 화면 터치 및 드래그)
+                    </p>
+                </div>
+            </div>
+
+            <!-- 0-2. 스네이크 게임 화면 -->
+            <div id="snake-game-menu" class="main-menu-content">
+                <div class="game-container">
+                    <h2>🐍 스네이크 (3D-like)</h2>
+                    <div class="game-info-bar">
+                        <span>점수: <span id="snake-score">0</span></span>
+                        <span>레벨: <span id="snake-level">1</span></span>
+                    </div>
+                    <div class="game-canvas-container" style="position: relative; display: flex; justify-content: center; align-items: center;">
+                        <canvas id="snake-canvas" width="600" height="400" style="background-color: #222; border: 2px solid var(--gnb-active);"></canvas>
+                        <div id="snake-game-over-section" style="display:none; position: absolute; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10; top: 0; left: 0;">
+                            <h3 style="color: white; font-size: 2.5rem; margin: 0 0 10px 0;">게임 오버!</h3>
+                            <p style="color: #ddd; margin-bottom: 80px;">다시 시작하려면 Enter를 누르세요.</p>
+                        </div>
+                        <button class="btn fn" id="snake-start-btn" style="position: absolute; z-index: 20; padding: 15px 30px; font-size: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); top: 55%; left: 50%; transform: translate(-50%, -50%); border-radius: 8px;">게임 시작 (Enter)</button>
+                    </div>
+                    <p class="game-controls-info">
+                        ↑ ↓ ← → : 이동
                     </p>
                 </div>
             </div>
@@ -512,6 +535,7 @@
             if (typeof initServerTime === 'function') initServerTime();
             if (typeof initCalculator === 'function') initCalculator();
             if (typeof initFileConverter === 'function') initFileConverter();
+            if (typeof initSnakeGame === 'function') initSnakeGame();
         });
 
         function openMainMenu(evt, menuName) {
@@ -573,5 +597,6 @@
     <script src="js/utils/calculator.js"></script>
     <script src="js/utils/fileConverter.js"></script>
     <script src="js/game/game.js"></script>
+    <script src="js/game/snakeGame.js"></script>
 </body>
 </html>
